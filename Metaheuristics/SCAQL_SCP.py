@@ -142,8 +142,6 @@ def SineCosineQL_SCP(id,instance_file,instance_dir,population,maxIter,discretiza
 
         memory.append(dataIter)
        
-        if iter % 100 == 0:
-            print(dataIter)
 
         if iter % 100 == 0:
             memory = connect.insertMemory(memory)

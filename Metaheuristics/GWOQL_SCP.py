@@ -169,9 +169,6 @@ def GWOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
         memory.append(dataIter)
        
         if iter % 100 == 0:
-            print(dataIter)
-
-        if iter % 100 == 0:
             memory = connect.insertMemory(memory)
 
     # Si es que queda algo en memoria para insertar
