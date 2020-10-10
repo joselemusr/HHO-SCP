@@ -1,0 +1,27 @@
+TRUNCATE TABLE datos_ejecucion CASCADE;
+TRUNCATE TABLE datos_iteracion CASCADE;
+TRUNCATE TABLE resultado_ejecucion CASCADE;
+
+ALTER SEQUENCE datos_ejecucion_seq RESTART WITH 1;
+ALTER SEQUENCE datos_iteracion_id_seq RESTART WITH 1;
+ALTER SEQUENCE resultado_ejecucion_id_seq RESTART with 1;
+
+
+
+
+SELECT  de.nombre_algoritmo,
+        de.parametros,
+        min(de.inicio) as PRIMER_INICIO,
+
+        max(de.inicio) as ULT_INICIO,
+        max(de.fin) as ULT_TERMINO,
+        SUM(CASE WHEN de.estado in ('pendiente') THEN 1 else 0 END) AS PENDIENTES,
+        SUM(CASE WHEN de.estado in ('ejecutando') THEN 1 else 0 END) AS EJECUTANDO,
+        SUM(CASE WHEN de.estado in ('terminado') THEN 1 else 0 END) AS TERMINADO
+
+FROM datos_ejecucion de
+LEFT JOIN datos_iteracion di on de.id = di.id_ejecucion
+
+group by
+         de.nombre_algoritmo,
+         de.parametros;
