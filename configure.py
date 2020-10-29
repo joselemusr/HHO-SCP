@@ -40,9 +40,8 @@ except db.exc.SQLAlchemyError as e:
 datosEjecucion = db.Table('datos_ejecucion', metadata, autoload=True, autoload_with=engine)
 insertDatosEjecucion = datosEjecucion.insert().returning(datosEjecucion.c.id)
 
-algorithms = ['SCA_SCP','SCAQL_SCP','GWO_SCP','GWOQL_SCP']
-#algorithms = ['SCAQL_SCP','GWOQL_SCP']
-instances = ['mscp41','mscp51','mscp61','mscpa1','mscpb1','mscpc1','mscpd1','mscpnre1','mscpnrf1']
+algorithms = ['HHO_SCP','HHOQL_SCP']
+instances = ['mscp41','mscp51','mscp61','mscpa1','mscpb1','mscpc1','mscpd1']
 #instances = ['mscp41']
 runs = 31
 #runs = 1

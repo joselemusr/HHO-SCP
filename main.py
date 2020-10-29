@@ -26,10 +26,8 @@ connect = Database.Database()
 
 # Algorithms
 
-from Metaheuristics.GWO_SCP import GWO_SCP
-from Metaheuristics.GWOQL_SCP import GWOQL_SCP
-from Metaheuristics.SCA_SCP import SineCosine_SCP
-from Metaheuristics.SCAQL_SCP import SineCosineQL_SCP
+from Metaheuristics.HHO_SCP import HHO_SCP
+from Metaheuristics.HHOQL_SCP import HHOQL_SCP
 
 
 flag = True
@@ -47,30 +45,8 @@ while flag:
     print(json.dumps(params,indent=4))
     print("------------------------------------------------------------------------------------------------------------------\n")
 
-    if(algorithm == 'GWO_SCP'):
-        if  GWO_SCP(id,
-                params['instance_file'],
-                params['instance_dir'],
-                params['population'],
-                params['maxIter'],
-                params['discretizationScheme']
-                )== True:
-            print(f'Ejecución {id} completada ')
-
-    if(algorithm == 'GWOQL_SCP'):
-        if  GWOQL_SCP(id,
-                params['instance_file'],
-                params['instance_dir'],
-                params['population'],
-                params['maxIter'],
-                params['discretizationScheme'],
-                0.1,
-                0.4
-                ) == True:
-            print(f'Ejecución {id} completada ')
-
-    if(algorithm == 'SCA_SCP'):
-        if  SineCosine_SCP(id,
+    if(algorithm == 'HHO_SCP'):
+        if  HHO_SCP(id,
                 params['instance_file'],
                 params['instance_dir'],
                 params['population'],
@@ -79,8 +55,8 @@ while flag:
                 ) == True:
             print(f'Ejecución {id} completada ')
 
-    if(algorithm == 'SCAQL_SCP'):
-        if  SineCosineQL_SCP(id,
+    if(algorithm == 'HHOQL_SCP'):
+        if  HHOQL_SCP(id,
                 params['instance_file'],
                 params['instance_dir'],
                 params['population'],

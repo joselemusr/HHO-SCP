@@ -23,6 +23,9 @@ from Problem.util import read_instance as Instance
 from Problem import SCP as Problem
 from Metrics import Diversidad as dv
 
+# ML
+from MachineLearning import QLearning
+
 # Definicion Environments Vars
 workdir = os.path.abspath(os.getcwd())
 workdirInstance = workdir+env('DIR_INSTANCES')
@@ -30,7 +33,12 @@ workdirInstance = workdir+env('DIR_INSTANCES')
 connect = Database.Database()
 
 
-def SineCosine_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionScheme):
+transferFunction = ['V1', 'V2', 'V3', 'V4', 'S1', 'S2', 'S3', 'S4']
+operatorBinarization = ['Standard','Complement','Elitist','Static','ElitistRoulette']
+
+DS_actions = [tf + "," + ob for tf in transferFunction for ob in operatorBinarization]
+
+def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionScheme,ql_alpha,ql_gamma):
 
     instance_path = workdirInstance + instance_dir + instance_file
 
@@ -57,15 +65,19 @@ def SineCosine_SCP(id,instance_file,instance_dir,population,maxIter,discretizaci
     state = []
 
     #Generar población inicial
-    poblacion = np.random.uniform(low=-1.0, high=1.0, size=(pob,dim))
+    poblacion = np.random.uniform(low=0.0, high=1.0, size=(pob,dim))
     matrixBin = np.zeros((pob,dim))
     fitness = np.zeros(pob)
     solutionsRanking = np.zeros(pob)
-    matrixBin,fitness,solutionsRanking  = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS)
+
+    # QLEARNING 
+    agente = QLearning.QAgent(ql_alpha, ql_gamma, DS_actions, maxIter+1)
+    DS = agente.getAccion(0)
+
+    matrixBin,fitness,solutionsRanking  = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS_actions[DS])
     diversidades, maxDiversidades, PorcentajeExplor, PorcentajeExplot, state = dv.ObtenerDiversidadYEstado(matrixBin,maxDiversidades)
 
     timerStart = time.time()
-    timerStartResult = time.time()
     memory = []
     for iter in range(0, maxIter):
         processTime = time.process_time()  
@@ -73,10 +85,11 @@ def SineCosine_SCP(id,instance_file,instance_dir,population,maxIter,discretizaci
         if iter == 0:
             if not connect.startEjecucion(id,datetime.now(),'ejecutando'):
                 return False
-           
-
+     
         timerStart = time.time()
         
+
+        #SCAQL
         r1 = a - iter * (a/maxIter)
         r4 = np.random.uniform(low=0.0,high=1.0, size=poblacion.shape[0])
         r2 = (2*np.pi) * np.random.uniform(low=0.0,high=1.0, size=poblacion.shape)
@@ -89,17 +102,24 @@ def SineCosine_SCP(id,instance_file,instance_dir,population,maxIter,discretizaci
         poblacion[r4>=0.5] = poblacion[r4>=0.5] + np.multiply(r1,np.multiply(np.cos(r2[r4>=0.5]),np.abs(np.multiply(r3[r4>=0.5],Best)-poblacion[r4>=0.5])))
         # poblacion[bestRow] = Best
         
-        #Binarizamos y evaluamos el fitness de todas las soluciones de la iteración t
-        matrixBin,fitness,solutionsRanking = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS)
 
+        # Escogemos esquema desde QL
+        DS = agente.getAccion(iter)
+
+        #Binarizamos y evaluamos el fitness de todas las soluciones de la iteración t
+        matrixBin,fitness,solutionsRanking = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS_actions[DS])
 
         #Conservo el Best
         if fitness[bestRowAux] > BestFitness:
             fitness[bestRowAux] = BestFitness
             matrixBin[bestRowAux] = BestBinary
 
+      
+        # Observamos, y recompensa/castigo.  Actualizamos Tabla Q
+        agente.Qnuevo(np.min(fitness), DS, iter+1)
+
         diversidades, maxDiversidades, PorcentajeExplor, PorcentajeExplot, state = dv.ObtenerDiversidadYEstado(matrixBin,maxDiversidades)
-        BestFitnes = str(np.min(fitness))
+        BestFitnes = str(np.min(fitness)) # para JSON
 
         walltimeEnd = np.round(time.time() - timerStart,6)
         processTimeEnd = np.round(time.process_time()-processTime,6) 
@@ -112,7 +132,7 @@ def SineCosine_SCP(id,instance_file,instance_dir,population,maxIter,discretizaci
                 "fitness": BestFitnes,
                 "clockTime": walltimeEnd,
                 "processTime": processTimeEnd,
-                "DS":DS,
+                "DS":str(DS),
                 "Diversidades":  str(diversidades),
                 "PorcentajeExplor": str(PorcentajeExplor),
                 "PorcentajeExplot": str(PorcentajeExplot),
@@ -129,7 +149,7 @@ def SineCosine_SCP(id,instance_file,instance_dir,population,maxIter,discretizaci
     # Si es que queda algo en memoria para insertar
     if(len(memory)>0):
         memory = connect.insertMemory(memory)
-
+        
     #Actualizamos la tabla resultado_ejecucion, sin mejor_solucion
     memory2 = []
     dataResult = {
