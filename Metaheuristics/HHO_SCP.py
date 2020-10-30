@@ -173,7 +173,7 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
                     if solutionsRanking is None: solutionsRanking = np.ones(pob)*999999
                     Fy11 = solutionsRanking
                     for i in indexCond11:
-                        Fy11[i] = Problem.SCP(y11[i],matrixBin[i],solutionsRanking[i],vectorCostos,matrizCobertura,DS)
+                        Fy11[i] = Problem.SCP(np.array(y11[i]),matrixBin[i],solutionsRanking[i],vectorCostos,matrizCobertura,DS)
                     Fz11 = solutionsRanking
                     for i in indexCond11:
                         Fz11[i] = Problem.SCP(z11[i],matrixBin[i],solutionsRanking[i],vectorCostos,matrizCobertura,DS)

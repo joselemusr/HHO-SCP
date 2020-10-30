@@ -41,7 +41,7 @@ datosEjecucion = db.Table('datos_ejecucion', metadata, autoload=True, autoload_w
 insertDatosEjecucion = datosEjecucion.insert().returning(datosEjecucion.c.id)
 
 #algorithms = ['HHO_SCP','HHOQL_SCP']
-algorithms = ['SCA_SCP']
+algorithms = ['HHO_SCP']
 #instances = ['mscp41','mscp51','mscp61','mscpa1','mscpb1','mscpc1','mscpd1']
 instances = ['mscp41']
 runs = 1
