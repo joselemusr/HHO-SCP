@@ -15,18 +15,21 @@ def SCP(poblacion,matrixBin,solutionsRanking,costos,cobertura,ds):
 
     #Reparamos
     repair = repara.ReparaStrategy(cobertura,costos,cobertura.shape[0],cobertura.shape[1])
-    if matrixBin.shape[0] == 1:
+    if matrixBin.ndim == 1:
         if repair.cumple(matrixBin) == 0:
                 matrixBin = repair.repara_one(matrixBin)[0]
 
+        #Calculamos Fitness
+        fitness = np.sum(np.multiply(matrixBin,costos))
+        #solutionsRanking = np.argsort(fitness) # rankings de los mejores fitness
     else:
         for solucion in range(matrixBin.shape[0]):
             if repair.cumple(matrixBin[solucion]) == 0:
                 matrixBin[solucion] = repair.repara_one(matrixBin[solucion])[0]
 
-    #Calculamos Fitness
-    fitness = np.sum(np.multiply(matrixBin,costos),axis=1)
-    solutionsRanking = np.argsort(fitness) # rankings de los mejores fitness
+        #Calculamos Fitness
+        fitness = np.sum(np.multiply(matrixBin,costos),axis=1)
+        solutionsRanking = np.argsort(fitness) # rankings de los mejores fitness
 
 
     return matrixBin,fitness,solutionsRanking

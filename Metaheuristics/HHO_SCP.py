@@ -77,6 +77,7 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
 
 
     for iter in range(0, maxIter):
+        print(iter)
         processTime = time.process_time()  
 
         if iter == 0:
@@ -101,89 +102,114 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
         BestBinary = matrixBin[bestRowAux]
         BestFitness = np.min(fitness)
 
-        if np.min(Eabs) >= 1:
-            if np.min(q) >= 0.5: # ecu 1.1
-                indexCond11 = np.intersect1d(np.argwhere(Eabs>=1),np.argwhere(q>=0.5)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 1.1
-                Xrand = poblacion[np.random.randint(low=0, high=pob, size=indexCond11.shape[0])] #Me entrega un conjunto de soluciones rand de tam indexCond11.shape[0] (osea los que cumplen la cond11)
-                poblacion[indexCond11] = Xrand - np.multiply(np.random.uniform(low= 0.0, high=1.0, size=indexCond11.shape[0]),np.abs(Xrand-(2*np.multiply(np.random.uniform(low= 0.0, high=1.0, size = indexCond11.shape[0]),poblacion[indexCond11])))) #Aplico la ecu 1.1 solamente a las que cumplen las condiciones np.argwhere(Eabs>=1),np.argwhere(q>=0.5)
+        #print(f'Eabs: {Eabs}')
 
-            else: # ecu 1.2
-                indexCond12 = np.intersect1d(np.argwhere(Eabs>=1),np.argwhere(q<0.5)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 1.2 
-                poblacion[indexCond12] = (Best - Xm)- np.multiply( np.random.uniform(low= 0.0, high=1.0, size = indexCond12.shape[0]), (LB + np.random.uniform(low= 0.0, high=1.0, size = indexCond12.shape[0]) * (UB-LB)) )
-        else:
-            if np.min(Eabs) >= 0.5:
-                if np.min(r) >= 0.5: # ecu 4
-                    indexCond4 = np.intersect1d(np.argwhere(Eabs>=0.5),np.argwhere(r>=0.5)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 4
-                    poblacion[indexCond4] = (Best - poblacion[indexCond4]) - np.multiply( E[indexCond4], np.abs( np.multiply( 2*(1-np.random.uniform(low= 0.0, high=1.0, size=indexCond4.shape[0])), Best )- poblacion[indexCond4] ) )                
-                else: #ecu 10
-                    indexCond10 = np.intersect1d(np.argwhere(Eabs>=0.5),np.argwhere(r<0.5))#Nos entrega los index de las soluciones a las que debemos aplicar la ecu 10
-                    #ecu 7
-                    y10 = poblacion
-                    y10[indexCond10] = y10[bestRowAux]- np.multiply( E[indexCond10], np.abs( np.multiply( 2*(1-np.random.uniform(low= 0.0, high=1.0, size=indexCond10.shape[0])), y10[bestRowAux] )- y10[indexCond10] ) )  
+        #ecu 1.1
+        indexCond1_1 = np.intersect1d(np.argwhere(Eabs>=1),np.argwhere(q>=0.5)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 1.1
+        #print("indexCond1_1")
+        if indexCond1_1.shape[0] != 0:
+            Xrand = poblacion[np.random.randint(low=0, high=pob, size=indexCond1_1.shape[0])] #Me entrega un conjunto de soluciones rand de tam indexCond1_1.shape[0] (osea los que cumplen la cond11)
+            
+            poblacion[indexCond1_1] = Xrand - np.multiply(np.random.uniform(low= 0.0, high=1.0, size=indexCond1_1.shape[0]), np.abs(Xrand- (2* np.multiply(np.random.uniform(low= 0.0, high=1.0, size = indexCond1_1.shape[0]),poblacion[indexCond1_1].T).T)).T).T #Aplico la ecu 1.1 solamente a las que cumplen las condiciones np.argwhere(Eabs>=1),np.argwhere(q>=0.5)
+        
+        #ecu 1.2
+        indexCond1_2 = np.intersect1d(np.argwhere(Eabs>=1),np.argwhere(q<0.5)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 1.2 
+        #print("indexCond1_2")
+        if indexCond1_2.shape[0] != 0:
+            
+            array_Xm = np.zeros(poblacion[indexCond1_2].shape)
+            array_Xm = array_Xm + Xm
 
-                    #ecu 8
-                    z10 = y10
-                    S = np.random.uniform(low= 0.0, high=1.0, size=(y10.shape))
-                    LF = np.divide((0.01 * np.random.uniform(low= 0.0, high=1.0, size=(y10.shape)) * sigma),np.power(np.abs(np.random.uniform(low= 0.0, high=1.0, size=(y10.shape))),(1/beta)))
-                    z10[indexCond10] = y10[indexCond10] + S[indexCond10]*LF
+            poblacion[indexCond1_2] = ((Best - array_Xm).T - np.multiply( np.random.uniform(low= 0.0, high=1.0, size = indexCond1_2.shape[0]), (LB + np.random.uniform(low= 0.0, high=1.0, size = indexCond1_2.shape[0]) * (UB-LB)) )).T
 
-                    #evaluar fitness de ecu 7 y 8
-                    Fy10 = solutionsRanking
-                    Fy10[indexCond10] = Problem.SCP(y10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS)
-                    
-                    Fz10 = solutionsRanking
-                    Fz10[indexCond10] = Problem.SCP(z10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS)
-                    
-                    #ecu 10.1
-                    indexCond101 = np.intersect1d(indexCond10, np.argwhere(Fy10 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 10.1
-                    poblacion[indexCond101] = y10[indexCond101]
+        #ecu 4
+        indexCond4 = np.intersect1d(np.argwhere(Eabs>=0.5),np.argwhere(r>=0.5)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 4
+        #print("indexCond4")
+        if indexCond4.shape[0] != 0:
+            
+            array_Xm = np.zeros(poblacion[indexCond4].shape)
+            array_Xm = array_Xm + Xm
 
-                    #ecu 10.2
-                    indexCond102 = np.intersect1d(indexCond10, np.argwhere(Fz10 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 10.2
-                    poblacion[indexCond102] = z10[indexCond102]
-            else:
-                if np.min(r) >= 0.5: # ecu 6
-                    indexCond6 = np.intersect1d(np.argwhere(Eabs<0.5),np.argwhere(r>=0.5)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 6
-                    poblacion[indexCond6] = Best- np.multiply(E[indexCond6], np.abs(Best - poblacion[indexCond6] ) )
+            poblacion[indexCond4] = ((array_Xm - poblacion[indexCond4]) - np.multiply( E[indexCond4], np.abs(np.multiply( 2*(1-np.random.uniform(low= 0.0, high=1.0, size=indexCond4.shape[0])), array_Xm.T ).T - poblacion[indexCond4]).T).T)
 
-                else: #ecu 11
-                    indexCond11 = np.intersect1d(np.argwhere(Eabs<0.5),np.argwhere(r<0.5))#Nos entrega los index de las soluciones a las que debemos aplicar la ecu 11
-                    #ecu 12
-                    y11 = poblacion
-                    array_Xm = np.zeros(poblacion[indexCond11].shape)
-                    array_Xm = array_Xm + Xm
+        #ecu 10
+        indexCond10 = np.intersect1d(np.argwhere(Eabs>=0.5),np.argwhere(r<0.5))#Nos entrega los index de las soluciones a las que debemos aplicar la ecu 10 
+        if indexCond10.shape[0] != 0:
+            #print("indexCond10")    
+            y10 = poblacion
+            #ecu 7
+            
+            Array_y10 = np.zeros(poblacion[indexCond10].shape)
+            Array_y10 = Array_y10 + y10[bestRowAux]
+            
+            y10[indexCond10] = Array_y10- np.multiply( E[indexCond10], np.abs( np.multiply( 2*(1-np.random.uniform(low= 0.0, high=1.0, size=indexCond10.shape[0])), Array_y10.T ).T- Array_y10 ).T ).T  
+            
+            #ecu 8
+            z10 = y10
+            S = np.random.uniform(low= 0.0, high=1.0, size=(y10[indexCond10].shape))
+            LF = np.divide((0.01 * np.random.uniform(low= 0.0, high=1.0, size=(y10[indexCond10].shape)) * sigma),np.power(np.abs(np.random.uniform(low= 0.0, high=1.0, size=(y10[indexCond10].shape))),(1/beta)))
+            
+            z10[indexCond10] = y10[indexCond10] + np.multiply(LF,S)
 
-                    #*** Cambiar y probar por:
-                    #array_E = np.ones(poblacion[indexCond11].shape)
-                    #array_E = array_E[indexCond11]*E[indexCond11]
+            #evaluar fitness de ecu 7 y 8
+            Fy10 = solutionsRanking
+            Fy10[indexCond10] = Problem.SCP(y10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS)[1]
+            
+            Fz10 = solutionsRanking
+            Fz10[indexCond10] = Problem.SCP(z10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS)[1]
+            
+            #ecu 10.1
+            indexCond101 = np.intersect1d(indexCond10, np.argwhere(Fy10 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 10.1
+            if indexCond101.shape[0] != 0:
+                #print("indexCond101")
+                poblacion[indexCond101] = y10[indexCond101]
 
-                    array_E = np.zeros(poblacion[indexCond11].shape)
-                    array_E[:,0] = E[indexCond11]
-                    array_E[:,1] = E[indexCond11]
+            #ecu 10.2
+            indexCond102 = np.intersect1d(indexCond10, np.argwhere(Fz10 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 10.2
+            if indexCond102.shape[0] != 0:
+                #print("indexCond102")    
+                poblacion[indexCond102] = z10[indexCond102]
 
-                    y11[indexCond11] = y11[bestRowAux]-  np.multiply(  array_E,  np.abs(  np.multiply(  2*(1-np.random.uniform(low= 0.0, high=1.0, size=poblacion[indexCond11].shape)),  y11[bestRowAux]  )- array_Xm ) )
+            # ecu 6
+            indexCond6 = np.intersect1d(np.argwhere(Eabs<0.5),np.argwhere(r>=0.5)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 6
+            if indexCond6.shape[0] != 0:
+                #print("indexCond6")    
+                poblacion[indexCond6] = Best - np.multiply(E[indexCond6], np.abs(Best - poblacion[indexCond6] ).T ).T
 
-                    #ecu 13
-                    z11 = y11
-                    S = np.random.uniform(low= 0.0, high=1.0, size=(y11.shape))
-                    LF = np.divide((0.01 * np.random.uniform(low= 0.0, high=1.0, size=(y11.shape)) * sigma),np.power(np.abs(np.random.uniform(low= 0.0, high=1.0, size=(y11.shape))),(1/beta)))
-                    z11[indexCond11] = y11[indexCond11] + np.multiply(S[indexCond11],LF[[indexCond11]])
+            #ecu 11
+            indexCond11 = np.intersect1d(np.argwhere(Eabs<0.5),np.argwhere(r<0.5))#Nos entrega los index de las soluciones a las que debemos aplicar la ecu 11
+            if indexCond11.shape[0] != 0:
+                #print("indexCond11")
+                #ecu 12
+                y11 = poblacion
+                array_Xm = np.zeros(poblacion[indexCond11].shape)
+                array_Xm = array_Xm + Xm
 
-                    #evaluar fitness de ecu 12 y 13
-                    if solutionsRanking is None: solutionsRanking = np.ones(pob)*999999
-                    Fy11 = solutionsRanking
-                    for i in indexCond11:
-                        Fy11[i] = Problem.SCP(np.array(y11[i]),np.array(matrixBin[i]),np.array(solutionsRanking[i]),vectorCostos,matrizCobertura,DS)
-                    Fz11 = solutionsRanking
-                    for i in indexCond11:
-                        Fz11[i] = Problem.SCP(z11[i],matrixBin[i],solutionsRanking[i],vectorCostos,matrizCobertura,DS)
-                    
-                    #ecu 11.1
-                    indexCond111 = np.intersect1d(indexCond11, np.argwhere(Fy11 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 11.1
+                y11[indexCond11] = y11[bestRowAux]-  np.multiply(E[indexCond11],  np.abs(  np.multiply(  2*(1-np.random.uniform(low= 0.0, high=1.0, size=poblacion[indexCond11].shape)),  y11[bestRowAux]  )- array_Xm ).T ).T
+
+                #ecu 13
+                z11 = y11
+                S = np.random.uniform(low= 0.0, high=1.0, size=(y11.shape))
+                LF = np.divide((0.01 * np.random.uniform(low= 0.0, high=1.0, size=(y11.shape)) * sigma),np.power(np.abs(np.random.uniform(low= 0.0, high=1.0, size=(y11.shape))),(1/beta)))
+                z11[indexCond11] = y11[indexCond11] + np.multiply(S[indexCond11],LF[[indexCond11]])
+
+                #evaluar fitness de ecu 12 y 13
+                if solutionsRanking is None: solutionsRanking = np.ones(pob)*999999
+                
+                Fy11 = solutionsRanking
+                Fy11[indexCond11] = Problem.SCP(y11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS)[1]
+
+                Fz11 = solutionsRanking
+                Fz11[indexCond11] = Problem.SCP(z11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS)[1]
+                
+                #ecu 11.1
+                indexCond111 = np.intersect1d(indexCond11, np.argwhere(Fy11 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 11.1
+                if indexCond111.shape[0] != 0:
                     poblacion[indexCond111] = y11[indexCond111]
 
-                    #ecu 11.2
-                    indexCond112 = np.intersect1d(indexCond11, np.argwhere(Fz11 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 11.2
+                #ecu 11.2
+                indexCond112 = np.intersect1d(indexCond11, np.argwhere(Fz11 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 11.2
+                if indexCond112.shape[0] != 0:
                     poblacion[indexCond112] = z11[indexCond112]
 
         
