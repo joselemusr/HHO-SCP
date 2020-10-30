@@ -77,7 +77,7 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
 
 
     for iter in range(0, maxIter):
-        print(iter)
+        #print(iter)
         processTime = time.process_time()  
 
         if iter == 0:
