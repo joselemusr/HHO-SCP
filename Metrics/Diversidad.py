@@ -173,4 +173,5 @@ def ObtenerDiversidadYEstado(Poblacion,maxDiversidades):
         else:
             state.append(0) # Explotación
 
-    return diversidades, maxDiversidades, PorcentajeExplor, PorcentajeExplot, state
+    #return diversidades, maxDiversidades, PorcentajeExplor, PorcentajeExplot, state
+    return np.around(diversidades,2), np.around(maxDiversidades,2), np.around(PorcentajeExplor,2), np.around(PorcentajeExplot,2), state
