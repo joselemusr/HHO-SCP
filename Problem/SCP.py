@@ -5,7 +5,7 @@ from .repair import ReparaStrategy as repara
 from Discretization import DiscretizationScheme as DS
 
 #action : esquema de discretizacion DS
-def SCP(poblacion,matrixBin,solutionsRanking,costos,cobertura,ds,repair):
+def SCP(poblacion,matrixBin,solutionsRanking,costos,cobertura,ds,repairType):
 
     #Binarización de 2 pasos
 
@@ -17,7 +17,7 @@ def SCP(poblacion,matrixBin,solutionsRanking,costos,cobertura,ds,repair):
     repair = repara.ReparaStrategy(cobertura,costos,cobertura.shape[0],cobertura.shape[1])
     if matrixBin.ndim == 1:
         if repair.cumple(matrixBin) == 0:
-                matrixBin = repair.repara_one(matrixBin,repair)[0]
+                matrixBin = repair.repara_one(matrixBin,repairType)[0]
 
         #Calculamos Fitness
         fitness = np.sum(np.multiply(matrixBin,costos))
@@ -25,7 +25,7 @@ def SCP(poblacion,matrixBin,solutionsRanking,costos,cobertura,ds,repair):
     else:
         for solucion in range(matrixBin.shape[0]):
             if repair.cumple(matrixBin[solucion]) == 0:
-                matrixBin[solucion] = repair.repara_one(matrixBin[solucion],repair)[0]
+                matrixBin[solucion] = repair.repara_one(matrixBin[solucion],repairType)[0]
 
         #Calculamos Fitness
         fitness = np.sum(np.multiply(matrixBin,costos),axis=1)
