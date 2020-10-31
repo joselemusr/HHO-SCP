@@ -160,10 +160,10 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
 
             #evaluar fitness de ecu 7 y 8
             Fy10 = solutionsRanking
-            Fy10[indexCond10] = Problem.SCP(y10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS,repair)[1]
+            Fy10[indexCond10] = Problem.SCP(y10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS_actions[DS],repair)[1]
             
             Fz10 = solutionsRanking
-            Fz10[indexCond10] = Problem.SCP(z10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS,repair)[1]
+            Fz10[indexCond10] = Problem.SCP(z10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS_actions[DS],repair)[1]
             
             #ecu 10.1
             indexCond101 = np.intersect1d(indexCond10, np.argwhere(Fy10 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 10.1
@@ -204,10 +204,10 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
                 if solutionsRanking is None: solutionsRanking = np.ones(pob)*999999
                 
                 Fy11 = solutionsRanking
-                Fy11[indexCond11] = Problem.SCP(y11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS,repair)[1]
+                Fy11[indexCond11] = Problem.SCP(y11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS_actions[DS],repair)[1]
 
                 Fz11 = solutionsRanking
-                Fz11[indexCond11] = Problem.SCP(z11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS,repair)[1]
+                Fz11[indexCond11] = Problem.SCP(z11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS_actions[DS],repair)[1]
                 
                 #ecu 11.1
                 indexCond111 = np.intersect1d(indexCond11, np.argwhere(Fy11 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 11.1
