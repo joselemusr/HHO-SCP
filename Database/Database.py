@@ -4,6 +4,7 @@ import sys
 import os
 import settings
 from envs import env
+from datetime import datetime
 
 # SQL
 import sqlalchemy as db
@@ -115,6 +116,9 @@ class Database:
                 params = json.loads(row[datosEjecucion.c.parametros])
                 id = row[datosEjecucion.c.id]
                 algorithm = row[datosEjecucion.c.nombre_algoritmo]
+
+            # marcamos como ejecutando de inmediato
+            self.startEjecucion(id,datetime.now(),'ejecutando')
 
             return id, algorithm,  params
 

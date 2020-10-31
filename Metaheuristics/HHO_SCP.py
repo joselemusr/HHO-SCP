@@ -48,7 +48,6 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
     pob = population
     maxIter = maxIter
     DS = discretizacionScheme #[v1,Standard]
-    a = 2
 
     #Variables de diversidad
     diversidades = []
@@ -65,9 +64,6 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
     matrixBin,fitness,solutionsRanking  = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS)
     diversidades, maxDiversidades, PorcentajeExplor, PorcentajeExplot, state = dv.ObtenerDiversidadYEstado(matrixBin,maxDiversidades)
 
-    timerStart = time.time()
-    timerStartResult = time.time()
-    memory = []
 
     #Parámetros fijos de HHO
     beta=1.5 #Escalar según paper
@@ -75,15 +71,12 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
     LB = -10 #Limite inferior de los valores continuos
     UB = 10 #Limite superior de los valores continuos
 
+    inicio = datetime.now()
+    timerStartResult = time.time()
+    memory = []
 
     for iter in range(0, maxIter):
-        #print(iter)
         processTime = time.process_time()  
-
-        if iter == 0:
-            if not connect.startEjecucion(id,datetime.now(),'ejecutando'):
-                return False
-           
 
         timerStart = time.time()
         
@@ -238,7 +231,7 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
                 "processTime": processTimeEnd,
                 "DS":DS,
                 "Diversidades":  str(diversidades),
-                "PorcentajeExplor": str(PorcentajeExplor),
+                "PorcentajeExplor": str(PorcentajeExplor)
                 #"PorcentajeExplot": str(PorcentajeExplot),
                 #"state": str(state)
                 })
@@ -256,11 +249,12 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
 
     #Actualizamos la tabla resultado_ejecucion, sin mejor_solucion
     memory2 = []
+    fin = datetime.now()
     dataResult = {
         "id_ejecucion": id,
-        "fitness": BestFitnes
-        #"inicio": timerStartResult,
-        #"fin": time.time()
+        "fitness": BestFitnes,
+        "inicio": inicio,
+        "fin": fin
         }
     memory2.append(dataResult)
     dataResult = connect.insertMemoryBest(memory2)
