@@ -31,7 +31,7 @@ workdirInstance = workdir+env('DIR_INSTANCES')
 connect = Database.Database()
 
 
-def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionScheme):
+def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionScheme,repair):
 
     instance_path = workdirInstance + instance_dir + instance_file
 
@@ -61,7 +61,7 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
     matrixBin = np.zeros((pob,dim))
     fitness = np.zeros(pob)
     solutionsRanking = np.zeros(pob)
-    matrixBin,fitness,solutionsRanking  = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS)
+    matrixBin,fitness,solutionsRanking  = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS,repair)
     diversidades, maxDiversidades, PorcentajeExplor, PorcentajeExplot, state = dv.ObtenerDiversidadYEstado(matrixBin,maxDiversidades)
 
 
@@ -146,10 +146,10 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
 
             #evaluar fitness de ecu 7 y 8
             Fy10 = solutionsRanking
-            Fy10[indexCond10] = Problem.SCP(y10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS)[1]
+            Fy10[indexCond10] = Problem.SCP(y10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS,repair)[1]
             
             Fz10 = solutionsRanking
-            Fz10[indexCond10] = Problem.SCP(z10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS)[1]
+            Fz10[indexCond10] = Problem.SCP(z10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS,repair)[1]
             
             #ecu 10.1
             indexCond101 = np.intersect1d(indexCond10, np.argwhere(Fy10 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 10.1
@@ -190,10 +190,10 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
                 if solutionsRanking is None: solutionsRanking = np.ones(pob)*999999
                 
                 Fy11 = solutionsRanking
-                Fy11[indexCond11] = Problem.SCP(y11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS)[1]
+                Fy11[indexCond11] = Problem.SCP(y11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS,repair)[1]
 
                 Fz11 = solutionsRanking
-                Fz11[indexCond11] = Problem.SCP(z11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS)[1]
+                Fz11[indexCond11] = Problem.SCP(z11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS,repair)[1]
                 
                 #ecu 11.1
                 indexCond111 = np.intersect1d(indexCond11, np.argwhere(Fy11 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 11.1
@@ -207,7 +207,7 @@ def HHO_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSchem
 
         
         #Binarizamos y evaluamos el fitness de todas las soluciones de la iteración t
-        matrixBin,fitness,solutionsRanking = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS)
+        matrixBin,fitness,solutionsRanking = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS,repair)
 
 
         #Conservo el Best

@@ -40,17 +40,17 @@ except db.exc.SQLAlchemyError as e:
 datosEjecucion = db.Table('datos_ejecucion', metadata, autoload=True, autoload_with=engine)
 insertDatosEjecucion = datosEjecucion.insert().returning(datosEjecucion.c.id)
 
-#algorithms = ['HHO_SCP','HHOQL_SCP']
-algorithms = ['HHO_SCP']
+algorithms = ['HHO_SCP','HHOQL_SCP']
+#algorithms = ['HHO_SCP']
 #instances = ['mscp41','mscp51','mscp61','mscpa1','mscpb1','mscpc1','mscpd1']
 instances = ['mscp41','mscp51','mscp61','mscpa1','mscpb1','mscpc1','mscpd1']
-runs = 10
-#runs = 1
+runs = 2
 maxIter = 5000
 #maxIter = 200
 ql_alpha = 0.1
 ql_gamma =  0.4
 population  = 20
+repair = 2 # 1:Simple; 2:Compleja
 instance_dir = "MSCP/"
 for instance in instances:
     for algorithm in algorithms:
@@ -66,7 +66,8 @@ for instance in instances:
                     'maxIter':maxIter,
                     'discretizationScheme':'V4,Elitist',
                     'ql_alpha':0.1,
-                    'ql_gamma':0.4
+                    'ql_gamma':0.4,
+                    'repair': 2
             }),
                 'estado' : 'pendiente'
             }

@@ -51,7 +51,8 @@ while flag:
                 params['instance_dir'],
                 params['population'],
                 params['maxIter'],
-                params['discretizationScheme']
+                params['discretizationScheme'],
+                params['repair']
                 ) == True:
             print(f'Ejecución {id} completada ')
 
@@ -62,8 +63,9 @@ while flag:
                 params['population'],
                 params['maxIter'],
                 params['discretizationScheme'],
-                0.1,
-                0.4
+                params['ql_alpha'],
+                params['ql_gamma'],
+                params['repair']
                 ) == True:
             print(f'Ejecución {id} completada ')
 
