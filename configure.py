@@ -49,7 +49,7 @@ maxIter = 5000
 ql_alpha = 0.1
 ql_gamma =  0.4
 population  = 20
-repair = 1 # 1:Simple; 2:Compleja; 3:RepairGPU
+repair = 3 # 1:Simple; 2:Compleja; 3:RepairGPU
 instance_dir = "MSCP/"
 for instance in instances:
     for algorithm in algorithms:
