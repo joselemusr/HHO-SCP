@@ -164,7 +164,7 @@ class Read():
 
         for nomInstancia in orden:
             if nomInstancia in archivoInstancia:
-                print(f"instancia {nomInstancia}")
+                #print(f"instancia {nomInstancia}")
                 return orden[nomInstancia][1]
 
         return None

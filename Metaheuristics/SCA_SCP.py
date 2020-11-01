@@ -78,9 +78,9 @@ def SineCosine_SCP(id,instance_file,instance_dir,population,maxIter,discretizaci
         print(f'iter: {iter}')
         processTime = time.process_time()  
 
-        if iter == 0:
-            if not connect.startEjecucion(id,datetime.now(),'ejecutando'):
-                return False
+        # if iter == 0:
+        #     if not connect.startEjecucion(id,datetime.now(),'ejecutando'):
+        #         return False
            
 
         timerStart = time.time()

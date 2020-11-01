@@ -206,7 +206,7 @@ def _calcularColsReparar(ponderaciones):
     colsCandidatasGlobal = np.ones((ponderaciones.shape[0], 10), dtype=np.int32) * -1
     rng_states = create_xoroshiro128p_states(COL, seed=1)
     ponderacionMaxima = np.array([np.max(ponderaciones)])
-    print(f"ponderacion maxima {ponderacionMaxima}")
+    #print(f"ponderacion maxima {ponderacionMaxima}")
     #iniciar kernel
     threadsperblock = (NSOL, COL)
     blockspergrid_x = int(math.ceil(ponderaciones.shape[0] / threadsperblock[0]))
@@ -387,7 +387,7 @@ def kernelColsCandidatasGPU(ponderacion, ponderacionMax, colsCandidatasGlobal, r
     cuda.syncthreads()
 
     if ty==0 and tx==0:
-        print(ponderacionTmp)
+        #print(ponderacionTmp)
         return
     if ty == 0:
         

@@ -36,7 +36,7 @@ class DiscretizationScheme:
         #self.matrixBin = np.ndarray(matrixBin.shape, dtype=float, buffer=matrixBin)
         self.matrixBin = matrixBin
         self.SolutionRanking = SolutionRanking
-        self.bestRow = np.argmin(SolutionRanking)
+        self.bestRow = np.argmin(SolutionRanking) 
 
         #output
         self.matrixProbT = np.zeros(self.matrixCont.shape)
@@ -241,7 +241,7 @@ class DiscretizationScheme:
         else:
             BestSolutionRaking = int(self.SolutionRanking.shape[0] * alfa)
             random = np.random.randint(low = 0, high = BestSolutionRaking)
-            bestIndividual = self.matrixBin[self.SolutionRanking[random]]
+            bestIndividual = self.matrixBin[random]
 
         # si ProbT > Rand() , then bestIndividualBin, else 0
         self.matrixBinOut = np.where(conditionMatrix==True,bestIndividual,0)

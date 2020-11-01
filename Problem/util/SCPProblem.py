@@ -147,7 +147,7 @@ class SCPProblem():
 #    @profile
     def freparaBatch(self,x):
         start = datetime.now()
-        print(x.shape)
+        #print(x.shape)
         exit()
         end = datetime.now()
     

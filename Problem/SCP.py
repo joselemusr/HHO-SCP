@@ -10,41 +10,22 @@ from .repair import cumpleRestricciones as cumpleGPU
 def SCP(poblacion,matrixBin,solutionsRanking,costos,cobertura,ds,repairType,problemaGPU,pondRestricciones):
 
     #Binarización de 2 pasos
-
     ds = ds.split(",")
     ds = DS.DiscretizationScheme(poblacion,matrixBin,solutionsRanking,ds[0],ds[1])
     matrixBin = ds.binariza()
 
     #Reparamos
+    if repairType == 3: #Si reparamos con GPU
+        matrixBin = cumpleGPU.reparaSoluciones(matrixBin,problemaGPU.instance.get_r(),problemaGPU.instance.get_c(), pondRestricciones)   
 
-    matrixBin = cumpleGPU.reparaSoluciones(matrixBin,problemaGPU.instance.get_r(),problemaGPU.instance.get_c(), pondRestricciones)
-    #repair = repara.ReparaStrategy(cobertura,costos,cobertura.shape[0],cobertura.shape[1])
-    #matrixBin = repara.ReparaStrategy.repara_one(matrixBin,repairType,problemaGPU,pondRestricciones)
-    
+    else: #Si reparamos con CPU simple o complejo
+        repair = repara.ReparaStrategy(cobertura,costos,cobertura.shape[0],cobertura.shape[1])
+        for solucion in range(matrixBin.shape[0]):
+            if repair.cumple(matrixBin[solucion]) == 0:
+                matrixBin[solucion] = repair.repara_one(matrixBin[solucion],repairType,problemaGPU,pondRestricciones)[0]
+
     #Calculamos Fitness
     fitness = np.sum(np.multiply(matrixBin,costos),axis =1)
     solutionsRanking = np.argsort(fitness) # rankings de los mejores fitness
-
-    # if matrixBin.ndim == 1:
-    #     repair = repara.ReparaStrategy(cobertura,costos,cobertura.shape[0],cobertura.shape[1])
-    #     if repair.cumple(matrixBin) == 0:
-    #             matrixBin = repair.repara_one(matrixBin,repairType,problemaGPU,pondRestricciones)[0]
-
-    #     #Calculamos Fitness
-    #     fitness = np.sum(np.multiply(matrixBin,costos))
-    #     #solutionsRanking = np.argsort(fitness) # rankings de los mejores fitness
-    # else:
-    #     if repairType == 3:
-    #         matrixBin = repair.repara_one(matrixBin,repairType,problemaGPU,pondRestricciones)[0]
-    #     else:
-    #         repair = repara.ReparaStrategy(cobertura,costos,cobertura.shape[0],cobertura.shape[1])
-    #         for solucion in range(matrixBin.shape[0]):
-    #             if repair.cumple(matrixBin[solucion]) == 0:
-    #                 matrixBin[solucion] = repair.repara_one(matrixBin[solucion],repairType,problemaGPU,pondRestricciones)[0]
-
-        # #Calculamos Fitness
-        # fitness = np.sum(np.multiply(matrixBin,costos),axis=1)
-        # solutionsRanking = np.argsort(fitness) # rankings de los mejores fitness
-
 
     return matrixBin,fitness,solutionsRanking
