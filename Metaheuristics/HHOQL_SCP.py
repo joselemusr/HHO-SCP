@@ -27,6 +27,9 @@ from Metrics import Diversidad as dv
 # ML
 from MachineLearning import QLearning
 
+# RepairGPU
+from Problem.util import SCPProblem
+
 # Definicion Environments Vars
 workdir = os.path.abspath(os.getcwd())
 workdirInstance = workdir+env('DIR_INSTANCES')
@@ -48,6 +51,10 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
         return False
 
     instance = Instance.Read(instance_path)
+
+    problemaGPU = SCPProblem.SCPProblem(instance_path)
+    pondRestricciones = 1/np.sum(problemaGPU.instance.get_r(), axis=1)
+
 
     matrizCobertura = np.array(instance.get_r())
     vectorCostos = np.array(instance.get_c())
@@ -74,7 +81,7 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
     agente = QLearning.QAgent(ql_alpha, ql_gamma, DS_actions, maxIter+1)
     DS = agente.getAccion(0)
 
-    matrixBin,fitness,solutionsRanking  = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS_actions[DS],repair)
+    matrixBin,fitness,solutionsRanking  = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS_actions[DS],repair,problemaGPU,pondRestricciones)
     diversidades, maxDiversidades, PorcentajeExplor, PorcentajeExplot, state = dv.ObtenerDiversidadYEstado(matrixBin,maxDiversidades)
 
 
@@ -90,6 +97,7 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
     memory = []
 
     for iter in range(0, maxIter):
+        print(iter)
         processTime = time.process_time()  
      
         timerStart = time.time()
@@ -160,10 +168,10 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
 
             #evaluar fitness de ecu 7 y 8
             Fy10 = solutionsRanking
-            Fy10[indexCond10] = Problem.SCP(y10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS_actions[DS],repair)[1]
+            Fy10[indexCond10] = Problem.SCP(y10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS_actions[DS],repair,problemaGPU,pondRestricciones)[1]
             
             Fz10 = solutionsRanking
-            Fz10[indexCond10] = Problem.SCP(z10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS_actions[DS],repair)[1]
+            Fz10[indexCond10] = Problem.SCP(z10[indexCond10],matrixBin[indexCond10],solutionsRanking[indexCond10],vectorCostos,matrizCobertura,DS_actions[DS],repair,problemaGPU,pondRestricciones)[1]
             
             #ecu 10.1
             indexCond101 = np.intersect1d(indexCond10, np.argwhere(Fy10 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 10.1
@@ -204,10 +212,10 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
                 if solutionsRanking is None: solutionsRanking = np.ones(pob)*999999
                 
                 Fy11 = solutionsRanking
-                Fy11[indexCond11] = Problem.SCP(y11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS_actions[DS],repair)[1]
+                Fy11[indexCond11] = Problem.SCP(y11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS_actions[DS],repair,problemaGPU,pondRestricciones)[1]
 
                 Fz11 = solutionsRanking
-                Fz11[indexCond11] = Problem.SCP(z11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS_actions[DS],repair)[1]
+                Fz11[indexCond11] = Problem.SCP(z11[indexCond11],matrixBin[indexCond11],solutionsRanking[indexCond11],vectorCostos,matrizCobertura,DS_actions[DS],repair,problemaGPU,pondRestricciones)[1]
                 
                 #ecu 11.1
                 indexCond111 = np.intersect1d(indexCond11, np.argwhere(Fy11 < solutionsRanking)) #Nos entrega los index de las soluciones a las que debemos aplicar la ecu 11.1
@@ -223,7 +231,7 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
         DS = agente.getAccion(iter)
 
         #Binarizamos y evaluamos el fitness de todas las soluciones de la iteración t
-        matrixBin,fitness,solutionsRanking = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS_actions[DS],repair)
+        matrixBin,fitness,solutionsRanking = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS_actions[DS],repair,problemaGPU,pondRestricciones)
 
         #Conservo el Best
         if fitness[bestRowAux] > BestFitness:

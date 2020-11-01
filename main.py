@@ -28,7 +28,7 @@ connect = Database.Database()
 
 from Metaheuristics.HHO_SCP import HHO_SCP
 from Metaheuristics.HHOQL_SCP import HHOQL_SCP
-
+from Metaheuristics.SCA_SCP import SineCosine_SCP
 
 flag = True
 while flag:
@@ -69,4 +69,14 @@ while flag:
                 ) == True:
             print(f'Ejecución {id} completada ')
 
+    if(algorithm == 'SCA_SCP'):
+        if  SineCosine_SCP(id,
+                params['instance_file'],
+                params['instance_dir'],
+                params['population'],
+                params['maxIter'],
+                params['discretizationScheme'],
+                params['repair']
+                ) == True:
+            print(f'Ejecución {id} completada ')
   

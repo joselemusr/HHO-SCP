@@ -11,7 +11,7 @@ from . import solution as sl
 from . import heuristic as he
 import random
 import numpy as np
-
+from . import cumpleRestricciones as cumpleGPU
 
 class ReparaStrategy:
 
@@ -33,11 +33,13 @@ class ReparaStrategy:
         self.lSolution = []
         self.dict = he.getRowColumn(matrix)
 
-    def repara_one(self, solution,repair):
+    def repara_one(self,solution,repair,problemaGPU,pondRestricciones):
         if repair == 1:
             return self.reparaSimple(solution)
         elif repair == 2:
             return self.repara(solution)
+        elif repair == 3:
+            return self.reparaGPU(solution,problemaGPU,pondRestricciones)
 
     def repara(self, solution):
         #        print(f'solution {len(solution)}')
@@ -61,6 +63,12 @@ class ReparaStrategy:
                 solution[idxMenorPeso[0]] = 1
                 numRep += 1
         return solution, numRep
+
+    def reparaGPU(self,solutions,problemaGPU, pondRestricciones):
+        reparadasGpu = cumpleGPU.reparaSoluciones(solutions,problemaGPU.instance.get_r(),problemaGPU.instance.get_c(), pondRestricciones)
+        solutions = reparadasGpu
+        return solutions
+
 
     def cumple(self, solucion):
         for i in range(self.rows):
