@@ -25,7 +25,7 @@ from Problem import SCP as Problem
 from Metrics import Diversidad as dv
 
 # ML
-from MachineLearning import QLearning
+from MachineLearning.QLearning import Q_Learning as QL
 
 # RepairGPU
 from Problem.util import SCPProblem
@@ -42,7 +42,7 @@ operatorBinarization = ['Standard','Complement','Elitist','Static','ElitistRoule
 
 DS_actions = [tf + "," + ob for tf in transferFunction for ob in operatorBinarization]
 
-def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionScheme,ql_alpha,ql_gamma,repair):
+def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionScheme,ql_alpha,ql_gamma,repair,policy,rewardType,qlAlphaType):
 
     instance_path = workdirInstance + instance_dir + instance_file
 
@@ -78,12 +78,17 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
     solutionsRanking = np.zeros(pob)
 
     # QLEARNING 
-    agente = QLearning.QAgent(ql_alpha, ql_gamma, DS_actions, maxIter+1)
-    DS = agente.getAccion(0)
+    agente = QL(ql_gamma, DS_actions, 2, qlAlphaType, rewardType, maxIter,  qlAlpha = ql_alpha)
+    DS = agente.getAccion(0,policy) 
 
+    #Binarizar y calcular fitness
     matrixBin,fitness,solutionsRanking  = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS_actions[DS],repair,problemaGPU,pondRestricciones)
+    
+    #Calcular Diversidad y Estado
     diversidades, maxDiversidades, PorcentajeExplor, PorcentajeExplot, state = dv.ObtenerDiversidadYEstado(matrixBin,maxDiversidades)
 
+    #QLEARNING
+    CurrentState = state[0] #Estamos midiendo según Diversidad "DimensionalHussain"
 
     #Parámetros fijos de HHO
     beta=1.5 #Escalar según paper
@@ -228,7 +233,8 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
                     poblacion[indexCond112] = z11[indexCond112]        
 
         # Escogemos esquema desde QL
-        DS = agente.getAccion(iter)
+        DS = agente.getAccion(CurrentState,policy)
+        oldState = CurrentState #Rescatamos estado actual
 
         #Binarizamos y evaluamos el fitness de todas las soluciones de la iteración t
         matrixBin,fitness,solutionsRanking = Problem.SCP(poblacion,matrixBin,solutionsRanking,vectorCostos,matrizCobertura,DS_actions[DS],repair,problemaGPU,pondRestricciones)
@@ -238,12 +244,13 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
             fitness[bestRowAux] = BestFitness
             matrixBin[bestRowAux] = BestBinary
 
-      
-        # Observamos, y recompensa/castigo.  Actualizamos Tabla Q
-        agente.Qnuevo(np.min(fitness), DS, iter+1)
-
+        #Calcular Diversidad y Estado
         diversidades, maxDiversidades, PorcentajeExplor, PorcentajeExplot, state = dv.ObtenerDiversidadYEstado(matrixBin,maxDiversidades)
         BestFitnes = str(np.min(fitness)) # para JSON
+        
+        CurrentState = state[0]
+        # Observamos, y recompensa/castigo.  Actualizamos Tabla Q
+        agente.updateQtable(np.min(fitness), DS, CurrentState, oldState, iter)
 
         walltimeEnd = np.round(time.time() - timerStart,6)
         processTimeEnd = np.round(time.process_time()-processTime,6) 
@@ -286,6 +293,7 @@ def HHOQL_SCP(id,instance_file,instance_dir,population,maxIter,discretizacionSch
     memory2.append(dataResult)
     dataResult = connect.insertMemoryBest(memory2)
 
+    print(agente.getQtable())
     # Update ejecucion
     if not connect.endEjecucion(id,datetime.now(),'terminado'):
         return False

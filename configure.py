@@ -40,16 +40,20 @@ except db.exc.SQLAlchemyError as e:
 datosEjecucion = db.Table('datos_ejecucion', metadata, autoload=True, autoload_with=engine)
 insertDatosEjecucion = datosEjecucion.insert().returning(datosEjecucion.c.id)
 
-algorithms = ['HHO_SCP','HHOQL_SCP']
-#instances = ['mscp41']
-instances = ['mscp41','mscp42','mscp43','mscp44','mscp45','mscp46','mscp47','mscp48','mscp49','mscp410','mscp51','mscp52','mscp53','mscp54','mscp55','mscp56','mscp57','mscp58','mscp59','mscp510','mscp61','mscp62','mscp63','mscp64','mscp65','mscpa1','mscpa2','mscpa3','mscpa4','mscpa5','mscpb1','mscpb2','mscpb3','mscpb4','mscpb5','mscpc1','mscpc2','mscpc3','mscpc4','mscpc5','mscpd1','mscpd2','mscpd3','mscpd4','mscpd5',]
+algorithms = ['HHOQL_SCP']
+instances = ['mscp41']
+#instances = ['mscp41','mscp42','mscp43','mscp44','mscp45','mscp46','mscp47','mscp48','mscp49','mscp410','mscp51','mscp52','mscp53','mscp54','mscp55','mscp56','mscp57','mscp58','mscp59','mscp510','mscp61','mscp62','mscp63','mscp64','mscp65','mscpa1','mscpa2','mscpa3','mscpa4','mscpa5','mscpb1','mscpb2','mscpb3','mscpb4','mscpb5','mscpc1','mscpc2','mscpc3','mscpc4','mscpc5','mscpd1','mscpd2','mscpd3','mscpd4','mscpd5',]
+#instances = ['mscp41','mscp51','mscp61','mscpa1','mscpb1','mscpc1','mscpd1','mscpnre1','mscpnrf1','mscpnrg1','mscpnrh1']
 runs = 10
-maxIter = 5000
+maxIter = 50
 #maxIter = 200
 ql_alpha = 0.1
 ql_gamma =  0.4
+policy = "softMax-rulette-elitist" #puede ser 'e-greedy', 'greedy', 'e-soft', 'softMax-rulette', 'softMax-rulette-elitist'
+rewardType = "withPenalty1" #pueden ser 'withoutPenalty1': osea se recompensa con +1, 'withPenalty1': osea +1 o -1
+qlAlphaType = "static" # Puede ser 'static', 'iteration', 'visits'
 population  = 20
-repair = 3 # 1:Simple; 2:Compleja; 3:RepairGPU
+repair = 1 # 1:Simple; 2:Compleja; 3:RepairGPU
 instance_dir = "MSCP/"
 for instance in instances:
     for algorithm in algorithms:
@@ -66,7 +70,10 @@ for instance in instances:
                     'discretizationScheme':'V4,Elitist',
                     'ql_alpha': ql_gamma,
                     'ql_gamma': ql_gamma,
-                    'repair': repair
+                    'repair': repair,
+                    'policy': policy,
+                    'rewardType': rewardType,
+                    'qlAlphaType': qlAlphaType
             }),
                 'estado' : 'pendiente'
             }

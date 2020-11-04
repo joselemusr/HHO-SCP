@@ -65,7 +65,10 @@ while flag:
                 params['discretizationScheme'],
                 params['ql_alpha'],
                 params['ql_gamma'],
-                params['repair']
+                params['repair'],
+                params['policy'],
+                params['rewardType'],
+                params['qlAlphaType']
                 ) == True:
             print(f'Ejecución {id} completada ')
 
