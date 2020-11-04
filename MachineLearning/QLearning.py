@@ -11,7 +11,8 @@ class QAgent():
         self.alpha = alpha
         self.state = state
         self.actions = actions
-
+        
+        self.epsilon = 0.05
         self.bestMetric = 0
         self.Qvalues = np.zeros(shape=(self.state,len(self.actions))) #state,actions
         # self.Qvalues[0] = np.random.random(size=len(actions))
@@ -27,13 +28,47 @@ class QAgent():
 
         return -1
 
-    def getAccion(self,state):
+    def getAccion(self,state,politica):
         # if state == 0:
         #     return self.Qvalues[0][np.random.randint(0,len(self.actions)+1)] # cota sup, es exclusiva
-
+        # politicas de selección de acciones
+        
+        # e-greedy
+        probabilidad = np.random.uniform(low=0.0, high=1.0) #numero aleatorio [0,1]
+        if probabilidad <= self.epsilon: #seleccion aleatorio
+            return np.random.randint(low=0, high=self.Qvalues.shape[0]) #seleccion aleatoria de una accion     
+        else: #selecion de Q_Value mayor        
+            maximo = np.amax(self.Qvalues,axis=1) # retorna el elemento mayor por fila        
+            indices = np.where(self.Qvalues[state,:] == maximo[state])[0]  #retorna los indices donde se ubica el maximo en la fila estado        
+            return np.random.choice(indices) # funciona tanto cuando hay varios iguales como cuando hay solo uno 
+        
+        # greedy
         return np.argmax(self.Qvalues[state])
 
 
+        # e-soft 
+        probabilidad = np.random.uniform(low=0.0, high=1.0) #numero aleatorio [0,1]
+        if probabilidad > self.epsilon: #seleccion aleatorio
+            return np.random.randint(low=0, high=self.Qvalues.shape[0]) #seleccion aleatoria de una accion     
+        else: #selecion de Q_Value mayor        
+            maximo = np.amax(self.Qvalues,axis=1) # retorna el elemento mayor por fila        
+            indices = np.where(self.Qvalues[state,:] == maximo[state])[0]  #retorna los indices donde se ubica el maximo en la fila estado        
+            return np.random.choice(indices) # funciona tanto cuando hay varios iguales como cuando hay solo uno 
+
+        # softMax seleccion ruleta
+        
+        Qtable_normalizada = self.Qvalues[state] / np.linalg.norm(self.Qvalues[state]) # normalizacion de valores   
+        seleccionado = np.random.choice(self.Qvalues[state],p=Qtable_normalizada)
+        indices = np.where(self.Qvalues[state,:] == seleccionado)[0]
+        return np.random.choice(indices)
+    
+        # softmax seleccion ruleta elitista (25% mejores acciones)
+        sort = np.argsort(self.Qvalues[state]) # argumentos ordenados
+        cant_mejores = int(sort.shape[0]*0.25) # obtenemos el 25% de los mejores argumentos
+        rulette_elitist = sort[0:cant_mejores] # tiene el 25% de los mejores argumentos
+        return np.random.choice(rulette_elitist)
+    
+    
     def Qnuevo(self,metric,action,state):
 
         #revisar
