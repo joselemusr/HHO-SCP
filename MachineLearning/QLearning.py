@@ -63,6 +63,7 @@ class Q_Learning():
         elif policy == "softMax-rulette":
             #*** Falta generar una normalización de las probabilidades que sumen 1, para realizar el choice
             Qtable_normalizada = np.nan_to_num(self.Qvalues[state] / np.linalg.norm(self.Qvalues[state])) # normalizacion de valores   
+            #La suma de las prob = 1
             seleccionado = np.random.choice(self.Qvalues[state],p=Qtable_normalizada)
             indices = np.where(self.Qvalues[state,:] == seleccionado)[0]
             return np.random.choice(indices)
